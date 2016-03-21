@@ -103,11 +103,12 @@ public class Conection {
         }
     }
 
-    public ResultSet getPreviusResultRaceRunner(int idMarathon, String idRaceEvent, String gender) {
+    public ResultSet getPreviusResultRaceRunner(int idMarathon, String idRaceEvent, String gender, String ageCategory) {
         try {
+            String[] ageCategoryBetween = ageCategory.split(","); // separate string to get values for age category query 
             
-            if("Any".equals(gender)){
-                query = conection.prepareStatement(""
+            // Query String
+            String queryString = ""
                     +   "SELECT * \n" +
                         "FROM registration r\n" +
                         "INNER JOIN runner ru ON r.RunnerId = ru.RunnerId\n" +
@@ -117,31 +118,36 @@ public class Conection {
                         "INNER JOIN registrationevent re ON r.RegistrationId = re.RegistrationId\n" +
                         "INNER JOIN event e ON re.EventId = e.EventId\n" +
                         "INNER JOIN marathon m ON e.MarathonId = m.MarathonId\n" +
-                        "WHERE m.MarathonId = ? AND e.EventId = ? AND re.RaceTime != 0 ORDER BY re.RaceTime ASC"
-                    + "");
-            }else{
-                query = conection.prepareStatement(""
-                    +   "SELECT * \n" +
-                        "FROM registration r\n" +
-                        "INNER JOIN runner ru ON r.RunnerId = ru.RunnerId\n" +
-                        "INNER JOIN country cou ON ru.CountryCode = cou.CountryCode\n" +
-                        "INNER JOIN user u ON ru.Email = u.Email\n" +
-                        "INNER JOIN gender g ON ru.Gender = g.Gender\n" +
-                        "INNER JOIN registrationevent re ON r.RegistrationId = re.RegistrationId\n" +
-                        "INNER JOIN event e ON re.EventId = e.EventId\n" +
-                        "INNER JOIN marathon m ON e.MarathonId = m.MarathonId\n" +
-                        "WHERE m.MarathonId = ? AND e.EventId = ? AND g.Gender = ? AND re.RaceTime != 0 ORDER BY re.RaceTime ASC"
-                    + "");
+                        "WHERE m.MarathonId = ? AND e.EventId = ?";
+            
+            // filter gender (male or female)
+            if(!"Any".equals(gender)){
+                queryString += " AND g.Gender = ? ";
+            }
+            
+            // filter for age category
+            if(!"".equals(ageCategory)){
+                queryString += " AND TIMESTAMPDIFF(YEAR, ru.DateOfBirth, CURDATE()) BETWEEN "+Integer.parseInt(ageCategoryBetween[0])+" AND "+Integer.parseInt(ageCategoryBetween[1])+" ";
+            }
+            
+            // filter for order ascesdent
+            queryString += " AND re.RaceTime != 0 ORDER BY re.RaceTime ASC";
+            
+            // query
+            query = conection.prepareStatement(queryString);
+            
+            // set parameters
+            query.setInt(1, idMarathon);
+            query.setString(2, idRaceEvent);
+            if(!"Any".equals(gender)){
                 query.setString(3, gender);
             }
             
-            query.setInt(1, idMarathon);
-            query.setString(2, idRaceEvent);
-            
+            // execute query
             data = query.executeQuery();
             
             return data;
-        } catch (Exception e) {
+        } catch (NumberFormatException | SQLException e) {
             System.out.println(e.getMessage());
             return null;
         }

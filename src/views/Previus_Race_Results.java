@@ -4,6 +4,7 @@ import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import models.Conection;
 
@@ -18,9 +19,11 @@ public class Previus_Race_Results extends javax.swing.JFrame {
     DefaultTableModel tablemodel;
     String[] idsMarathon;
     String[] idsRaceEvent;
+    String[] ageCategories;
     
     int idMarathon;
     String idRaceEvent;
+    String ageCategory;
     
     public Previus_Race_Results() {
         initComponents();
@@ -65,10 +68,21 @@ public class Previus_Race_Results extends javax.swing.JFrame {
             while(dataGender.next()){
                 comboGender.addElement(dataGender.getString("Gender"));
             }
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
         
         jcb_gender.setModel(comboGender);
+        
+        ageCategories = new String[]{
+            "0,17",
+            "18,29",
+            "30,39",
+            "40,55",
+            "56,70",
+            "71,120",
+        };
+        
+        int[] anchos = {50, 90, 150, 60};
+        setColumnWidths(anchos, jt_results);
         
     }
 
@@ -152,6 +166,11 @@ public class Previus_Race_Results extends javax.swing.JFrame {
         jcb_gender.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         jcb_ageCategory.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select Category", "Minor to 18 years", "18 - 29", "30 - 39", "40 - 55", "56 - 70", "More than 70 years" }));
+        jcb_ageCategory.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jcb_ageCategoryItemStateChanged(evt);
+            }
+        });
 
         jt_results.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -277,7 +296,6 @@ public class Previus_Race_Results extends javax.swing.JFrame {
         if(evt.getStateChange() == ItemEvent.SELECTED){
             if(jcb_raceEvent.getSelectedIndex() != 0){
                 idRaceEvent = idsRaceEvent[jcb_raceEvent.getSelectedIndex() - 1];
-                System.out.println(idRaceEvent);
             }
         }
     }//GEN-LAST:event_jcb_raceEventItemStateChanged
@@ -294,7 +312,7 @@ public class Previus_Race_Results extends javax.swing.JFrame {
             message("Select first one age category");
             jcb_ageCategory.requestFocus();
         }else{
-            ResultSet dataRunners = c.getPreviusResultRaceRunner(idMarathon, idRaceEvent, jcb_gender.getSelectedItem().toString());
+            ResultSet dataRunners = c.getPreviusResultRaceRunner(idMarathon, idRaceEvent, jcb_gender.getSelectedItem().toString(), ageCategory);
             
             // remove all rows to load new query
             DefaultTableModel modelo = (DefaultTableModel) jt_results.getModel();
@@ -321,6 +339,15 @@ public class Previus_Race_Results extends javax.swing.JFrame {
             jt_results.setModel(tablemodel);
         }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jcb_ageCategoryItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jcb_ageCategoryItemStateChanged
+        // TODO add your handling code here:
+        if(evt.getStateChange() == ItemEvent.SELECTED){
+            if(jcb_ageCategory.getSelectedIndex() != 0){
+                ageCategory = ageCategories[jcb_ageCategory.getSelectedIndex() - 1];
+            }
+        }
+    }//GEN-LAST:event_jcb_ageCategoryItemStateChanged
 
     /**
      * @param args the command line arguments
@@ -381,7 +408,7 @@ public class Previus_Race_Results extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private void message(String message) {
-        JOptionPane.showMessageDialog(this, message);
+        JOptionPane.showMessageDialog(this, message, "Marathons Skills 2016", JOptionPane.WARNING_MESSAGE);
     }
     
     public String formatRaceTime(String raceTime){ 
@@ -397,5 +424,43 @@ public class Previus_Race_Results extends javax.swing.JFrame {
         int seconds = (time) - ((hours * 3600) + (minutes * 60));
         
         return hours+"H "+minutes+"M "+seconds+"S" ;
+    }
+    
+    private void setColumnWidths(int[] widths, JTable table) {
+        int nrCols = table.getModel().getColumnCount();
+        if (nrCols == 0 || widths == null) {
+            return;
+        }
+
+        //current width of the table:
+        int totalWidth = table.getWidth();
+
+        int totalWidthRequested = 0;
+        int nrRequestedWidths = widths.length;
+        int defaultWidth = (int) Math.floor((double) totalWidth / (double) nrCols);
+
+        for (int col = 0; col < nrCols; col++) {
+            int width = 0;
+            if (widths.length > col) {
+                width = widths[col];
+            }
+            totalWidthRequested += width;
+        }
+        //Note: for the not defined columns: use the defaultWidth
+        if (nrRequestedWidths < nrCols) {
+            totalWidthRequested += ((nrCols - nrRequestedWidths) * defaultWidth);
+        }
+        //calculate the scale for the column width
+        double factor = (double) totalWidth / (double) totalWidthRequested;
+
+        for (int col = 0; col < nrCols; col++) {
+            int width = defaultWidth;
+            if (widths.length > col) {
+                //scale the requested width to the current table width
+                width = (int) Math.floor(factor * (double) widths[col]);
+            }
+            table.getColumnModel().getColumn(col).setPreferredWidth(width);
+            table.getColumnModel().getColumn(col).setWidth(width);
+        }
     }
 }
