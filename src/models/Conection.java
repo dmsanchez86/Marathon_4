@@ -152,5 +152,98 @@ public class Conection {
             return null;
         }
     }
+
+    public ResultSet getRunners() {
+        try {
+            query = conection.prepareStatement("SELECT * FROM runner r INNER JOIN user u ON r.Email = u.Email");
+            data = query.executeQuery();
+            
+            return data;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public int getCountRunners() {
+        int number = 0;
+        
+        try {
+            query = conection.prepareStatement("SELECT COUNT(*) FROM runner r INNER JOIN user u ON r.Email = u.Email");
+            data = query.executeQuery();
+            
+            while(data.next()){
+                number = data.getInt(1);
+            }
+            
+            return number;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+
+    public String[] getDataCharityByRunner(String idRunner) {
+        String[] dataCharity = new String[3];
+        
+        try {
+            query = conection.prepareStatement(""
+                    + "SELECT * \n" +
+                    "FROM charity c\n" +
+                    "INNER JOIN registration r ON c.CharityId = r.CharityId\n" +
+                    "INNER JOIN runner ru ON r.RunnerId = ru.RunnerId\n" +
+                    "WHERE r.RunnerId = ?");
+            query.setInt(1, Integer.parseInt(idRunner));
+            
+            data = query.executeQuery();
+            
+            while(data.next()){
+                dataCharity[0] = data.getString("CharityName");
+                dataCharity[1] = data.getString("CharityLogo");
+                dataCharity[2] = data.getString("CharityDescription");
+            }
+        } catch (SQLException | NumberFormatException e) {
+            return null;
+        }
+        
+        return dataCharity;
+    }
+
+    public Object[] getSponsorships(String idRunner) {
+        Object[] result = new Object[2];
+        
+        try {
+            query = conection.prepareStatement(""
+                    + "SELECT s.SponsorName, s.Amount\n" +
+                    "FROM sponsorship s\n" +
+                    "INNER JOIN registration r ON s.RegistrationId = r.RegistrationId\n" +
+                    "INNER JOIN runner ru ON r.RunnerId = ru.RunnerId\n" +
+                    "WHERE ru.RunnerId = ?"
+                    + "");
+            query.setInt(1, Integer.parseInt(idRunner));
+            data = query.executeQuery();
+            
+            result[0] = data;
+            
+            query = conection.prepareStatement(""
+                    + "SELECT SUM(s.Amount) as total\n" +
+                    "FROM sponsorship s\n" +
+                    "INNER JOIN registration r ON s.RegistrationId = r.RegistrationId\n" +
+                    "INNER JOIN runner ru ON r.RunnerId = ru.RunnerId\n" +
+                    "WHERE ru.RunnerId = ?"
+                    + "");
+            query.setInt(1, Integer.parseInt(idRunner));
+            data = query.executeQuery();
+            
+            while(data.next()){
+                result[1] = data.getString("total");
+            }
+            
+            return result;
+        } catch (SQLException | NumberFormatException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
     
 }
