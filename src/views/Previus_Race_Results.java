@@ -329,14 +329,19 @@ public class Previus_Race_Results extends javax.swing.JFrame {
                     row[1] = formatRaceTime(dataRunners.getString("RaceTime"));
                     row[2] = dataRunners.getString("FirstName")+" "+dataRunners.getString("LastName");
                     row[3] = dataRunners.getString("CountryCode");
-                    
+                    System.out.println(":=");
                     rank++;
                     tablemodel.addRow(row);
                 }
             } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
             
             jt_results.setModel(tablemodel);
+            
+            if(jt_results.getRowCount() <= 0){
+                message("No found registers!");
+            }
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
