@@ -28,6 +28,10 @@ public class Conection {
         return false;
     }
     
+    public Connection getConection(){
+        return conection;
+    }
+    
     public ResultSet getMarathons(){
         try {
             query = conection.prepareStatement("SELECT * FROM marathon");
@@ -240,6 +244,130 @@ public class Conection {
             }
             
             return result;
+        } catch (SQLException | NumberFormatException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public ResultSet getDataRunnersMarathon(int marathonId) {
+        try {
+            query = conection.prepareStatement(""
+                    + "SELECT *\n" +
+                    "FROM runner r\n" +
+                    "INNER JOIN user u ON r.Email = u.Email\n" +
+                    "INNER JOIN registration re ON r.RunnerId = re.RunnerId\n" +
+                    "INNER JOIN registrationstatus rs ON re.RegistrationStatusId = rs.RegistrationStatusId\n" +
+                    "INNER JOIN registrationevent r_e ON re.RegistrationId = r_e.RegistrationId\n" +
+                    "INNER JOIN event e ON r_e.EventId = e.EventId\n" +
+                    "INNER JOIN eventtype et ON e.EventTypeId = et.EventTypeId\n" +
+                    "INNER JOIN marathon m ON e.MarathonId = m.MarathonId\n" +
+                    "WHERE m.MarathonId = ?"
+                    + "");
+            query.setInt(1, marathonId);
+            data = query.executeQuery();
+            
+            return data;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public ResultSet getStatus() {
+        try {
+            query = conection.prepareStatement("SELECT * FROM registrationstatus");
+            data = query.executeQuery();
+            
+            return data;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+    
+    public int getCountStatus() {
+        try {
+            query = conection.prepareStatement("SELECT COUNT(*) FROM registrationstatus");
+            data = query.executeQuery();
+            
+            while(data.next()){
+                return data.getInt(1);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        
+        return -1; 
+    }
+    
+    public ResultSet getEventTypes() {
+        try {
+            query = conection.prepareStatement("SELECT * FROM eventtype");
+            data = query.executeQuery();
+            
+            return data;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+    
+    public int getCountEventTypes() {
+        try {
+            query = conection.prepareStatement("SELECT COUNT(*) FROM eventtype");
+            data = query.executeQuery();
+            
+            while(data.next()){
+                return data.getInt(1);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        
+        return -1;
+    }
+
+    public ResultSet getDataRunnersMarathonFilter(String idStatus, String idRaceEvent) {
+        try {
+            System.out.println(idStatus);
+            System.out.println(idRaceEvent);
+            
+            String queryString = ""
+                    + "SELECT *\n" +
+                    "FROM runner r\n" +
+                    "INNER JOIN user u ON r.Email = u.Email\n" +
+                    "INNER JOIN registration re ON r.RunnerId = re.RunnerId\n" +
+                    "INNER JOIN registrationstatus rs ON re.RegistrationStatusId = rs.RegistrationStatusId\n" +
+                    "INNER JOIN registrationevent r_e ON re.RegistrationId = r_e.RegistrationId\n" +
+                    "INNER JOIN event e ON r_e.EventId = e.EventId\n" +
+                    "INNER JOIN eventtype et ON e.EventTypeId = et.EventTypeId\n" +
+                    "INNER JOIN marathon m ON e.MarathonId = m.MarathonId\n" +
+                    "WHERE m.MarathonId = 5 "
+                    + "";
+            
+            if(idStatus != null){
+                queryString += " AND rs.RegistrationStatusId = ? ";
+            }
+            
+            if(idRaceEvent != null){
+                queryString += " AND et.EventTypeId = ? ";
+            }
+            
+            query = conection.prepareStatement(queryString);
+            if(idStatus != null){
+                query.setInt(1, Integer.parseInt(idStatus));
+            }
+            if(idRaceEvent != null && idStatus != null){
+                query.setString(2, idRaceEvent);
+            }
+            
+            if(idRaceEvent != null && idStatus == null){
+                query.setString(1, idRaceEvent);
+            }
+            data = query.executeQuery();
+            
+            return data;
         } catch (SQLException | NumberFormatException e) {
             System.out.println(e.getMessage());
             return null;
