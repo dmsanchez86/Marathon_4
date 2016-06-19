@@ -8,12 +8,6 @@ import javax.swing.JTable;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 import models.Conection;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.util.JRLoader;
-import net.sf.jasperreports.view.JasperViewer;
 
 /*
  * @author Mauro
@@ -359,20 +353,20 @@ public class Runner_Management extends javax.swing.JFrame {
 
     private void btnExportsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportsActionPerformed
         // TODO add your handling code here:
-        JasperViewer jv;
-        
-        String path = "/reports/reportRunnersMarathon.jasper";
-        JasperReport jr;
-        try {
-            jr = (JasperReport) JRLoader.loadObjectFromFile(path);
-            JasperPrint jp = JasperFillManager.fillReport(jr, null, c.getConection());
-            jv = new JasperViewer(jp, false);
-            jv.setVisible(true);
-            jv.setTitle("Report");
-            jv.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage());
-        }
+//        JasperViewer jv;
+//        
+//        String path = "/reports/reportRunnersMarathon.jasper";
+//        JasperReport jr;
+//        try {
+//            jr = (JasperReport) JRLoader.loadObjectFromFile(path);
+//            JasperPrint jp = JasperFillManager.fillReport(jr, null, c.getConection());
+//            jv = new JasperViewer(jp, false);
+//            jv.setVisible(true);
+//            jv.setTitle("Report");
+//            jv.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+//        } catch (Exception ex) {
+//            JOptionPane.showMessageDialog(null, ex.getMessage());
+//        }
     }//GEN-LAST:event_btnExportsActionPerformed
 
     /**

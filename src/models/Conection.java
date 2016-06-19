@@ -34,7 +34,7 @@ public class Conection {
     
     public ResultSet getMarathons(){
         try {
-            query = conection.prepareStatement("SELECT * FROM marathon");
+            query = conection.prepareStatement("SELECT * FROM marathon where MarathonId != 5");
             data = query.executeQuery();
             
             return data;
@@ -48,7 +48,7 @@ public class Conection {
         int numbers = 0;
         
         try {
-            query = conection.prepareStatement("SELECT Count(*) FROM marathon");
+            query = conection.prepareStatement("SELECT Count(*) FROM marathon where MarathonId != 5");
             data = query.executeQuery();
             
             while(data.next()){
@@ -221,8 +221,11 @@ public class Conection {
                     + "SELECT s.SponsorName, s.Amount\n" +
                     "FROM sponsorship s\n" +
                     "INNER JOIN registration r ON s.RegistrationId = r.RegistrationId\n" +
+                    "INNER JOIN registrationevent re ON re.RegistrationId = r.RegistrationId\n" +
+                    "INNER JOIN event e ON e.EventId = re.EventId\n" +
+                    "INNER JOIN marathon m ON m.MarathonId = e.MarathonId\n" +
                     "INNER JOIN runner ru ON r.RunnerId = ru.RunnerId\n" +
-                    "WHERE ru.RunnerId = ?"
+                    "WHERE ru.RunnerId = ? AND m.MarathonId = 5"
                     + "");
             query.setInt(1, Integer.parseInt(idRunner));
             data = query.executeQuery();
@@ -233,8 +236,11 @@ public class Conection {
                     + "SELECT SUM(s.Amount) as total\n" +
                     "FROM sponsorship s\n" +
                     "INNER JOIN registration r ON s.RegistrationId = r.RegistrationId\n" +
+                    "INNER JOIN registrationevent re ON re.RegistrationId = r.RegistrationId\n" +
+                    "INNER JOIN event e ON e.EventId = re.EventId\n" +
+                    "INNER JOIN marathon m ON m.MarathonId = e.MarathonId\n" +
                     "INNER JOIN runner ru ON r.RunnerId = ru.RunnerId\n" +
-                    "WHERE ru.RunnerId = ?"
+                    "WHERE ru.RunnerId = ? AND m.MarathonId = 5"
                     + "");
             query.setInt(1, Integer.parseInt(idRunner));
             data = query.executeQuery();
